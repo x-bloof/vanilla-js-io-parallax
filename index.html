@@ -1,5 +1,8 @@
-<html>
+<!DOCTYPE html>
+<html lang="fr">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>vanilla-parallax</title>
     <style>
       * {
@@ -8,7 +11,7 @@
 
       p {
         opacity: 0;
-        transition: opacity 0.8s ease-in;
+        transition: opacity 0.4s ease-in;
       }
 
       .parallax {
@@ -63,7 +66,7 @@
   </head>
   <body>
     <div class="h-screen">
-      <div class="green parallax"></div>
+      <div class="green"></div>
       <p class="parallax">Vanilla parallax</p>
     </div>
 
@@ -83,48 +86,50 @@
     </div>
 
     <script>
-      let ticking = false;
+      (useParallax = () => {
+        document.addEventListener("DOMContentLoaded", () => {
+          let ticking = false;
 
-      const scrollY = () => {
-        const sections = document.querySelectorAll(".h-screen");
-        const h = window.innerHeight;
+          const scrollY = () => {
+            const sections = document.querySelectorAll(".h-screen");
+            const h = window.innerHeight;
 
-        sections.forEach((section) => {
-          const rect = section.getBoundingClientRect();
-          if (rect.top <= h && rect.bottom >= 0) {
-            const localScrollY = rect.top * 0.12;
-            const parallaxItems = section.querySelectorAll(".parallax");
-            parallaxItems.forEach((item) => {
-              item.style.transform = `translate3d(0, ${localScrollY}px, 0)`;
+            sections.forEach((section) => {
+              const rect = section.getBoundingClientRect();
+              if (rect.top <= h && rect.bottom >= 0) {
+                const localScrollY = rect.top * 0.12;
+                const parallax = section.querySelectorAll(".parallax");
+                parallax.forEach((item) => {
+                  item.style.transform = `translate3d(0, ${localScrollY}px, 0)`;
+                });
+              }
             });
-          }
+            ticking = false;
+          };
+
+          const onScrollY = () => {
+            if (!ticking) {
+              ticking = true;
+              requestAnimationFrame(scrollY);
+            }
+          };
+
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                entry.isIntersecting
+                  ? entry.target.classList.add("visible")
+                  : entry.target.classList.remove("visible");
+              });
+            },
+            { threshold: 0.5 }
+          );
+
+          const targets = document.querySelectorAll(".parallax");
+          targets.forEach((el) => observer.observe(el));
+          window.addEventListener("scroll", onScrollY);
         });
-        ticking = false;
-      };
-
-      const onScrollY = () => {
-        if (!ticking) {
-          ticking = true;
-          requestAnimationFrame(scrollY);
-        }
-      };
-
-      const targets = document.querySelectorAll(".parallax");
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            entry.isIntersecting
-              ? entry.target.classList.add("visible")
-              : entry.target.classList.remove("visible");
-          });
-        },
-        { threshold: 0.5 }
-      );
-
-      for (const el of targets) {
-        observer.observe(el);
-      }
-      window.addEventListener("scroll", onScrollY);
+      })();
     </script>
   </body>
 </html>
