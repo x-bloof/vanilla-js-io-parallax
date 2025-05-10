@@ -10,12 +10,7 @@
       }
 
       p {
-        opacity: 0;
-        transition: opacity 0.4s ease-in;
-      }
-
-      .parallax {
-        will-change: transform;
+        transition: opacity 0.6s ease-in;
       }
 
       .visible {
@@ -34,7 +29,7 @@
         align-items: center;
         gap: 1rem;
         justify-content: center;
-        background-image: url("neoRoom.avif");
+        background-image: url("ito-jakuchu-birds.avif");
         background-size: contain;
         background-position: center;
         background-repeat: no-repeat;
@@ -49,7 +44,14 @@
         width: 30px;
         height: 30px;
         border-radius: 50%;
-        background-color: #00ff00;
+        background-color: #ff0000;
+        animation: morph 0.6s infinite alternate;
+      }
+
+      @keyframes morph {
+        0% {
+          border-radius: 0%;
+        }
       }
 
       .border {
@@ -62,27 +64,49 @@
         justify-content: center;
         gap: 0.8rem;
       }
+
+      .col {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .nav-1-2 {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1;
+      }
+      .nav-2-2 {
+        position: sticky;
+        top: 1rem;
+        transition: transform 0.4s ease-out;
+      }
     </style>
   </head>
   <body>
+    <div class="nav-1-2">Gray</div>
+    <div class="nav-2-2">X-bloof</div>
     <div class="h-screen">
       <div class="green"></div>
-      <p class="parallax">Vanilla parallax</p>
+      <div class="col" data-parallax="axis:y;inertia:0.12">
+        <p>&mdash; Vanilla Parallax</p>
+        <p>&mdash; Vanilla Parallax</p>
+        <p>&mdash; Vanilla Parallax</p>
+        <p>&mdash; Vanilla Parallax</p>
+        <p>&mdash; Vanilla Parallax</p>
+        <p>&mdash; Vanilla Parallax</p>
+      </div>
     </div>
-
-    <div class="h-screen nobg">
-      <div class="green"></div>
-      <p class="parallax">Vanilla parallax</p>
-    </div>
-
     <div class="h-screen">
       <div class="green"></div>
-      <p class="parallax">Vanilla parallax</p>
-    </div>
-
-    <div class="h-screen nobg">
-      <div class="green"></div>
-      <p class="parallax">Vanilla parallax</p>
+      <div class="col" data-parallax="axis:y;inertia:0.12">
+        <p>&mdash; Vanilla Parallax</p>
+        <p>&mdash; Vanilla Parallax</p>
+        <p>&mdash; Vanilla Parallax</p>
+        <p>&mdash; Vanilla Parallax</p>
+        <p>&mdash; Vanilla Parallax</p>
+        <p>&mdash; Vanilla Parallax</p>
+      </div>
     </div>
 
     <script>
@@ -90,44 +114,58 @@
         document.addEventListener("DOMContentLoaded", () => {
           let ticking = false;
 
-          const scrollY = () => {
+          const parse = (el) => {
+            const config = {};
+            const dataset = el.dataset.parallax;
+            const pairs = dataset.split(";");
+
+            for (let i = 0; i < pairs.length; i++) {
+              const [k, v] = pairs[i].split(":");
+              if (v !== undefined) {
+                config[k.trim()] = isNaN(v) ? v.trim() : parseFloat(v);
+              }
+            }
+
+            return config;
+          };
+
+          const updateParallax = () => {
             const sections = document.querySelectorAll(".h-screen");
             const h = window.innerHeight;
 
             sections.forEach((section) => {
               const rect = section.getBoundingClientRect();
+
               if (rect.top <= h && rect.bottom >= 0) {
-                const localScrollY = rect.top * 0.12;
-                const parallax = section.querySelectorAll(".parallax");
+                const parallax = section.querySelectorAll("[data-parallax]");
+
                 parallax.forEach((item) => {
-                  item.style.transform = `translate3d(0, ${localScrollY}px, 0)`;
+                  const { axis = "y", inertia = 0.12 } = parse(item);
+                  if (!item.style.willChange) {
+                    item.style.willChange = "transform";
+                  }
+
+                  const offset =
+                    (item.closest(".h-screen")?.getBoundingClientRect().top ||
+                      0) * inertia;
+                  const x = axis === "x" ? offset : 0;
+                  const y = axis === "y" ? offset : 0;
+
+                  item.style.transform = `translate3d(${x}px, ${y}px, 0)`;
                 });
               }
             });
             ticking = false;
           };
 
-          const onScrollY = () => {
+          const ScrollY = () => {
             if (!ticking) {
               ticking = true;
-              requestAnimationFrame(scrollY);
+              requestAnimationFrame(updateParallax);
             }
           };
 
-          const observer = new IntersectionObserver(
-            (entries) => {
-              entries.forEach((entry) => {
-                entry.isIntersecting
-                  ? entry.target.classList.add("visible")
-                  : entry.target.classList.remove("visible");
-              });
-            },
-            { threshold: 0.5 }
-          );
-
-          const targets = document.querySelectorAll(".parallax");
-          targets.forEach((el) => observer.observe(el));
-          window.addEventListener("scroll", onScrollY);
+          window.addEventListener("scroll", ScrollY);
         });
       })();
     </script>
