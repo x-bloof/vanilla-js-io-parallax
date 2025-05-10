@@ -1,0 +1,130 @@
+<html>
+  <head>
+    <title>vanilla-parallax</title>
+    <style>
+      * {
+        margin: 0;
+      }
+
+      p {
+        opacity: 0;
+        transition: opacity 0.8s ease-in;
+      }
+
+      .parallax {
+        will-change: transform;
+      }
+
+      .visible {
+        opacity: 1;
+      }
+
+      body {
+        color: white;
+        background-color: #000;
+      }
+
+      .h-screen {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        justify-content: center;
+        background-image: url("neoRoom.avif");
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+      }
+
+      .nobg {
+        background-image: none;
+      }
+
+      .green {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #00ff00;
+      }
+
+      .border {
+        width: 480px;
+        height: 640px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 0.8rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="h-screen">
+      <div class="green parallax"></div>
+      <p class="parallax">Vanilla parallax</p>
+    </div>
+
+    <div class="h-screen nobg">
+      <div class="green"></div>
+      <p class="parallax">Vanilla parallax</p>
+    </div>
+
+    <div class="h-screen">
+      <div class="green"></div>
+      <p class="parallax">Vanilla parallax</p>
+    </div>
+
+    <div class="h-screen nobg">
+      <div class="green"></div>
+      <p class="parallax">Vanilla parallax</p>
+    </div>
+
+    <script>
+      let ticking = false;
+
+      const scrollY = () => {
+        const sections = document.querySelectorAll(".h-screen");
+        const h = window.innerHeight;
+
+        sections.forEach((section) => {
+          const rect = section.getBoundingClientRect();
+          if (rect.top <= h && rect.bottom >= 0) {
+            const localScrollY = rect.top * 0.12;
+            const parallaxItems = section.querySelectorAll(".parallax");
+            parallaxItems.forEach((item) => {
+              item.style.transform = `translate3d(0, ${localScrollY}px, 0)`;
+            });
+          }
+        });
+        ticking = false;
+      };
+
+      const onScrollY = () => {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(scrollY);
+        }
+      };
+
+      const targets = document.querySelectorAll(".parallax");
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            entry.isIntersecting
+              ? entry.target.classList.add("visible")
+              : entry.target.classList.remove("visible");
+          });
+        },
+        { threshold: 0.5 }
+      );
+
+      for (const el of targets) {
+        observer.observe(el);
+      }
+      window.addEventListener("scroll", onScrollY);
+    </script>
+  </body>
+</html>
