@@ -9,5 +9,5 @@ const observer = new IntersectionObserver(
   { threshold: 0.5 }
 );
 
-const targets = document.querySelectorAll(".parallax");
+const targets = document.querySelectorAll("p");
 targets.forEach((el) => observer.observe(el));
